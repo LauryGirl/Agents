@@ -1,0 +1,127 @@
+\documentclass{book}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[colorlinks = true, linkcolor = magenta]{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\lstset{ %
+language = python, 
+basicstyle = \footnotesize,
+numbers = left,
+numberstyle = \footnotesize, 
+stepnumber = 1,
+numbersep = 5pt,
+backgroundcolor = \color{white},
+showspaces = false,
+showstringspaces = false,
+showtabs = false,
+frame = single,
+tabsize = 2,
+captionpos = b,
+breaklines = true,
+breakatwhitespace = false,
+escapeinside = {\%}{)} 
+}
+
+\begin{document}
+
+	\begin{titlepage}
+		\centering
+		{\bfseries\LARGE Universidad de La Habana \par }
+		\vspace{1cm}
+		{\scshape\LARGE Facultad de Matem\'atica y Computaci\'on \par}
+		\vspace{3cm}
+		{\scshape\Huge Robots de casa \par}
+		{\Large \underline{Proyecto Final de Simulaci\'on y Programaci\'on Declarativa} \par}
+		\vspace{3cm}
+		\vfill
+		{\Large \underline{Estudiante:} \par}
+		{\Large Laura Brito Guerrero C-412 \par}
+		\vfill
+	\end{titlepage}
+	
+	\section{Orientaci\'on}
+	El ambiente en el cual intervienen los agentes es discreto y tiene la forma de un rect\'angulo de N x M. El ambiente es de informaci\'on completa, por tanto todos los agentes conocen toda la informaci\'on sobre el agente. El ambiente puede variar aleatoriamente cada $t$ unidades de tiempo. El valor de $t$ es conocido. \\
+	Las acciones que realizan los agentes ocurren por turnos. En un turno, los agentes realizan sus acciones, una sola por cada agente, y modifican el medio sin que este var\'ie a no ser que cambie por una acci\'on de los agentes. En el siguiente, el ambiente puede variar. Si es el momento de cambio de ambiente, ocurre primero el cambio natural del ambiente y luego la variaci\'on aleatoria. En una unidad de tiempo ocurren el turno del agente y el turno de cambio del ambiente. \\
+	Los elementos que pueden existir en el ambiente son obst\'aculos, suciedad, ni\~nos, el corral y los agentes que son llamados Robots de Casa. A continuaci\'on se precisan las caracter\'isticas de los elementos del ambiente:
+	\begin{enumerate}
+		\item Obst\'aculos: estos ocupan una \'unica casilla en el ambiente. Estos pueden ser movidos, empuj\'andolos, por los ni\~nos, una \'unica casilla. El Robot de Casa sin embargo no puede moverlo. No pueden ser movidos ninguna de las casillas ocupadas por cualquier otro elemento del ambiente.
+		\item Suciedad: la suciedad es por cada casilla del ambiente. Solo puede aparecer en casillas que previamente estuvieron vac\'ias. Esta, o aparece en el estado inicial o es creada por los ni\~nos.
+		\item Corral: el corral ocupa casillas adyacentes en n\'umero igual al del total del ni\~nos presentes en el ambiente. El corral no puede moverse. En una casilla del corral solo puede coexistir un ni\~no. En una casilla del corral, que est\'e vac\'ia, puede entrar un robot. En una misma casilla del corral pueden coexistir un ni\~no y un robot solo si el robot lo carga, o si acaba de dejar al ni\~no.
+		\item Ni\~no: los ni\~nos ocupan solo una casilla. Ellos en el turno del ambiente se mueven si es posible (si la casilla no est\'a ocupada, no tiene suciedad, no est\'a en el corral, no hay un Robot de Casa), y aleatoriamente (puede  que no ocurra movimiento), a una de las casillas adyacentes. Si esa casilla est\'a ocupada por un obst\'aculo este es empujado por el ni\~no, si en la direcci\'on hay m\'as de un obst\'aculo, entonces se desplazan todos. Si el obst\'aculo est\'a en una posici\'on donde no puede ser empujado y el ni\~no lo intenta, entonces el obst\'aculo no se mueve y el ni\~no ocupa la misma posici\'on. Los ni\~nos son los responsables de que aparezca suciedad. Si en una cuadr\'icula de 3 por 3 hay un solo ni\~no, entonces, luego de que \'el se mueva aleatoriamente, una de las casillas de la cuadr\'icula puede haber sido ensuciada. Si hay dos ni\~nos se pueden ensuciar hasta 3. Si hay tres ni\~nos o m\'as pueden resultar sucias hasta 6. Los ni\~nos cuando est\'an en una casilla del corral, ni se mueven ni ensucian. Si un ni\~no es capturado por un Robot de Casa tampoco se mueve ni ensucia.
+		\item Robots de Casa: El Robot de Casa se encarga de limpiar y de controlar a los ni\~nos. El Robot se mueve a una de las casillas adyacentes, las que decida. Solo se mueve una casilla sino carga un ni\~no. Si carga a un ni\~no pude moverse hasta dos casillas consecutivas. Tambi\'en puede realizar las acciones de limpiar y cargar ni\~nos. Si se mueve a una casilla con suciedad, en el pr\'oximo turno puede decidir limpiar o moverse. Si se mueve a una casilla donde est\'a un ni\~no, inmediatamente lo carga. En ese momento, coexisten en la casilla Robot y ni\~no. Si se mueve a una casilla del corral que est\'a vac\'ia, y carga un ni\~no, puede decidir si lo deja en la casilla o se sigue moviendo. El Robot puede dejar al ni\~no que carga en cualquier casilla. En ese momento cesa el movimiento del Robot en el turno, y coexisten hasta el pr\'oximo turno, en la misma casilla, Robot y ni\~no.
+	\end{enumerate}
+	El objetivo del Robot de Casa es mantener la casa limpia. Se considera la casa limpia si el 60 porciento de las casillas no est\'an sucias.
+	
+	\section{Idea a seguir}
+	
+	Se tiene un tablero con rango $(h,w)$ donde $h$ es la altura y $w$ es el ancho. Una vez conocidos estos valores y a $t$ (a cada $t$ iteraciones los niños pueden o no moverse o dejar suciedad en casillas cercanas), se crea todo el espectro de objetos que tienen cabida en la misma : robots, ni\~nos, corral, obst\'aculos, suciedad(puede o no aparecer al inicio). Estos objetos tienen un n\'umero aleatorio en cada ejecuci\'on del programa. Una vez creado el tablero con todos los datos, se realizan las acciones posibles en los agentes (robots de casa). 
+	Las acciones a realizar por los agentes son las siguientes:
+	\begin{center}
+		childDown(x,y) $\rightarrow$ in(x,y) \textbf{and} childIn(r) \textbf{and} insideCorral(x,y) \textbf{and} downPossible(x,y,posCorral) \textbf{=} 0 \\
+		corralIn(x,y) $\rightarrow$ in(x,y) \textbf{and} childIn(r) \textbf{and} insideCorral(x,y) \textbf{=} 1 + distance ((x,y) posCorral) \\
+		corralBound(x,y) $\rightarrow$ in(x,y) \textbf{and} childIn(r) \textbf{and} posCorralBound((x,y) (bounds corral)) \textbf{=} 2 + distance ((x,y) posCorral) \\
+		clearRule(x,y) $\rightarrow$ in(x,y) \textbf{and} childIn(r) \textbf{and} dirt(x,y) \textbf{=} 3 + distance ((x,y) posCorral) \\
+		goCorral(x,y) $\rightarrow$ in(x,y) \textbf{and} childIn(r) \textbf{=} 4  + distance ((x,y) posCorral) \\
+		upChildRule(x,y) $\rightarrow$ in(x,y) \textbf{and} alone(r) \textbf{and} child(x,y) \textbf{=} (h * w) + 5 \\
+		clearAloneRule(x,y) $\rightarrow$ in(x,y) \textbf{and} alone(r) \textbf{and} dirt(x,y) \textbf{=} (h * w) + 6 \\
+		goRadar(x,y) $\rightarrow$ in(x,y) \textbf{and} alone(r) \textbf{=} (h * w) + 7 + distance ((x,y) objectRadar) \\
+		outCorral(x,y) $\rightarrow$ beforeInsideCorral(r) \textbf{and} in(x,y) \textbf{and} alone(r) \textbf{and} outsideCorral(x,y) \textbf{=} (h * w) + 8 + distance((x,y) bounds corral)
+	
+	\end{center}
+	
+	Donde:
+	\begin{enumerate}
+		\item in(x,y) : el robot se encuentra en la posici\'on $(x,y)$
+		\item childIn(r): el robot $r$ esta cargando un ni\~no
+		\item insideCorral(x,y): $(x,y)$ est\'a dentro del corral
+		\item outsideCorral(x,y): $(x,y)$ est\'a fuera del corral
+		\item downPossible(x,y,posCorral): $(x,y)$ \textbf{==} $posCorral$
+		\item posCorralBound((x,y), boundsCorral : $contains (x,y) \ boundsCorral$
+		\item dirt(x,y): la casilla $(x,y)$ est\'a sucia
+		\item beforeInsideCorral(r) : en la posici\'on actual se encuentra dentro del corral
+		\item alone(r) : el robot $r$ no esta cargando a ningún ni\~no
+		\item objectRadar: ni\~no fuera del corral o suciedad m\'as cercana para el robot
+	\end{enumerate}
+	
+	A trav\'es de estos predicados se aplican las reglas que interpretan las acciones de los agentes otorg\'andoles una prioridad. De esta manera en cada paso se conoce todas las acciones \'optimas de cada agente, y se toma de todas ellas la de menor prioridad posible. \\
+	Estas reglas se analizan por cada nueva posici\'on adyacente posible de cada agente, para de esta forma tener todas las posibles acciones del mismo. \\
+	Cuando el robot est\'a cargando a un ni\~no se le consideran sus acciones prioritarias con respecto a los que est\'an sin ni\~nos. Es importante se\~nalar que a los robots que cargan ni\~nos le es posible dar dos pasos seguidos en cada turno, significa que a estos se les analiza por cada $(x0,y0)$ nueva, 8 nuevas posiciones adyacentes m\'as a $(x0,y0)$. \\
+	Una vez que se conozcan por cada agente todas las posibles nuevas posiciones, se procede a concatenar todas las acciones posibles de todos los agentes. Las nuevas posiciones de cada agente se obtiene mediante un algoritmo de ordenaci\'on tal que:
+	\begin{enumerate}
+		\item El agente $i$ solo puede realizar una acci\'on,
+		\item Se va tomando siempre la nueva posici\'on que mayor prioridad tenga tal que no se repita esa nueva posici\'on con las ya seleccionadas como \'optima.
+	\end{enumerate}
+	De esta manera se garantiza que no se repitan posiciones y que cada agente vaya a realizar una sola tarea. Una vez analizado el ambiente y el desplazamiento de los robots hacia las nuevas posiciones se actualiza la informaci\'on del ambiente y se da paso a la pr\'oxima ronda.
+	
+	\section{Inteligencias Artificiales implementadas}
+	
+	\subsection{Comportamiento deductivo:}
+	Se esclarece en el t\'opico anterior con la explicaci\'on de las reglas y los predicados, siempre tomando la de mayor prioridad posible. \\
+	Dicho comportamiento se encuentra basado en l\'ogica, el proceso de toma de decisi\'on de un agente es modelado por un conjunto de predicados (reglas de deducci\'on).
+	
+	\subsection{Arquitectura de capas verticales de dos pases (InterRap)}
+		Cada capa tiene asociada una base de conocimiento (los agentes y su ambiente a diferentes niveles de abstracci\'on).
+		La base de conocimiento de mayor nivel representa los planes y acciones de otros agentes en el ambiente. La base de conocimiento intermedia representa los planes y acciones del agente mismo. La base mas baja representa la informaci\'on $real$ sobre el ambiente.
+			
+		\subsubsection{La capa de conducta}
+		
+	 		Aborda el comportamiento reactivo del agente (se encuentra definida en las reglas, cuando un agente $i$ no tiene un prop\'osito definido sino que busca qu\'e acci\'on cercana es la m\'as \'optima, no obstante, todo este comportamiento se visualiza en la concatenaci\'on de todas las posibles acciones de todos los agentes).
+	 	\subsubsection{La capa cooperativa}
+	 		Cuando se realiza el an\'alisis de las nuevas posiciones d\'andole importancia a la prioridad de todos los agentes y escogiendo a trav\'es de una negociaci\'on, el conjunto de acciones \'optimas.
+	 	\subsubsection{La capa de planeamiento}
+	 		Como se ven en las reglas, los agentes si no tienen una acci\'on inmediata, analiza futuras acciones, por lo que se acerca a su $nuevo \ objetivo$.Se puede observar en las reglas $goCorral(x,y)$,  $goRadar(x,y)$.
+
+	\section{Detalles para ejecutar el programa}
+		Se considera que las entradas siempre ser\'an n\'umeros enteros. Si desea aumentar la cantidad de rondas debe cambiar el valor del pen\'ultimo par\'ametro de \textbf{init\underline{  }} en \textbf{Main.hs}.
+	
+	\section{Ejecuci\'on del programa}
+	
+		En el directorio $code/src$:
+		\begin{center}
+			$\gg$ stack ghci Main.hs
+		\end{center}
+		 
+	
+	
+\end{document}
